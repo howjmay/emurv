@@ -87,3 +87,53 @@ pub const CSRRC: u32 = 0x03;
 pub const CSRRWI: u32 = 0x05;
 pub const CSRRSI: u32 = 0x06;
 pub const CSRRCI: u32 = 0x07;
+
+pub fn rd(instr: u32) -> u32 {
+    return (instr >> 7) & 0x1f; // rd in bits 11..7
+}
+pub fn rs1(instr: u32) -> u32 {
+    return (instr >> 15) & 0x1f; // rs1 in bits 19..15
+}
+pub fn rs2(instr: u32) -> u32 {
+    return (instr >> 20) & 0x1f; // rs2 in bits 24..20
+}
+
+pub fn shamt(instr: u32) -> u32 {
+    // shamt[4:5] = imm[5:0]
+    return (imm_I(instr) & 0x1f) as u32;
+}
+
+pub fn csr(instr: u32) -> u64 {
+    // csr[11:0] = inst[31:20]
+    return ((instr & 0xfff00000) >> 20) as u64;
+}
+
+pub fn imm_B(instr: u32) -> u64 {
+    // imm[12|10:5|4:1|11] = inst[31|30:25|11:8|7]
+    return ((instr & 0x80000000) >> 19) as u64
+        | ((instr & 0x80) << 4) as u64 // imm[11]
+        | ((instr >> 20) & 0x7e0) as u64 // imm[10:5]
+        | ((instr >> 7) & 0x1e) as u64; // imm[4:1]
+}
+
+pub fn imm_S(instr: u32) -> u64 {
+    // imm[11:5] = inst[31:25], imm[4:0] = inst[11:7]
+    return ((instr & 0xfe000000) >> 20) as u64 | ((instr >> 7) & 0x1f) as u64;
+}
+
+pub fn imm_I(instr: u32) -> i32 {
+    return ((instr & 0xfff00000) as i32 >> 20);
+}
+
+pub fn imm_U(instr: u32) -> u64 {
+    // imm[31:12] = inst[31:12]
+    return (instr & 0xfffff999) as u64;
+}
+
+pub fn imm_J(instr: u32) -> u64 {
+    // imm[20|10:1|11|19:12] = inst[31|30:21|20|19:12]
+    return ((instr & 0x80000000) >> 11) as u64
+        | (instr & 0xff000)  as u64 // imm[19:12]
+        | ((instr >> 9) & 0x800)  as u64 // imm[11]
+        | ((instr >> 20) & 0x7fe) as u64; // imm[10:1]
+}
