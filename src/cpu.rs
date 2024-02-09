@@ -114,14 +114,12 @@ impl CPU {
 // RV32I
 // see page 64 at https://riscv.org/wp-content/uploads/2016/06/riscv-spec-v2.1.pdf
 pub fn exec_lui(cpu: &mut CPU, instr: u32) {
-    // FIXME negative
-    let imm = imm_U(instr);
+    let imm = (imm_U(instr) as i32) as u64;
     cpu.xregs.regs[rd(instr) as usize] = imm;
 }
 pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
-    // FIXME negative
-    let imm = imm_U(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.pc + imm;
+    let imm = (imm_U(instr) as i32) as i64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i64 + imm) as u64;
 }
 pub fn exec_jal(cpu: &mut CPU, instr: u32) {}
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {}
