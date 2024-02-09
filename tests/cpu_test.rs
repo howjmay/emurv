@@ -3,10 +3,17 @@ mod helper;
 #[cfg(test)]
 mod tests {
     use crate::helper;
-    use emurv::cpu;
+    use emurv::{cpu, opcode::*};
 
     #[test]
-    fn test_exec_lui() {}
+    fn test_exec_lui() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // lui x5, 4
+        let instr: u32 = helper::set_u_type_instruction(4, 5, LUI as u8);
+        cpu::exec_lui(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[5], 4 << 12);
+    }
     #[test]
     fn test_exec_auipc() {}
     #[test]
@@ -52,7 +59,7 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         // addi x31, x0, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 0, 0x0, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 0, ADDI as u8, 31);
         cpu::exec_addi(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 4);
     }
@@ -63,15 +70,15 @@ mod tests {
         // set x1=3
         helper::set_register_val(&mut cpu_test, 1, 3);
         // slti x31, x1, 2
-        let instr: u32 = helper::set_i_type_instruction(2, 1, 0x2, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(2, 1, SLTI as u8, 31);
         cpu::exec_slti(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0);
         // slti x31, x1, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 1, 0x2, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 1, SLTI as u8, 31);
         cpu::exec_slti(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 1);
         // slti x31, x1, -2
-        let instr: u32 = helper::set_i_type_instruction(-2, 1, 0x2, 31, 0x13); // 254 == -2
+        let instr: u32 = helper::set_i_type_instruction(-2, 1, SLTI as u8, 31); // 254 == -2
         cpu::exec_slti(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0);
     }
@@ -82,15 +89,15 @@ mod tests {
         // set x1=3
         helper::set_register_val(&mut cpu_test, 1, 3);
         // sltiu x31, x1, 2
-        let instr: u32 = helper::set_i_type_instruction(2, 1, 0x3, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(2, 1, SLTIU as u8, 31);
         cpu::exec_sltiu(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0);
         // sltiu x31, x1, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 1, 0x3, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 1, SLTIU as u8, 31);
         cpu::exec_sltiu(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 1);
         // sltiu x31, x1, 254
-        let instr: u32 = helper::set_i_type_instruction(-2, 1, 0x3, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(-2, 1, SLTIU as u8, 31);
         cpu::exec_sltiu(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 1);
     }
@@ -99,7 +106,7 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         // xori x31, x0, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 0, 0x4, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 0, XORI as u8, 31);
         cpu::exec_xori(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 4);
     }
@@ -108,7 +115,7 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         // ori x31, x0, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 0, 0x6, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 0, ORI as u8, 31);
         cpu::exec_ori(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 4);
     }
@@ -117,7 +124,7 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         // andi x31, x0, 4
-        let instr: u32 = helper::set_i_type_instruction(4, 0, 0x7, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(4, 0, ANDI as u8, 31);
         cpu::exec_andi(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0);
     }
@@ -128,7 +135,7 @@ mod tests {
         // set x1=3
         helper::set_register_val(&mut cpu_test, 1, 3);
         // slli x31, x0, 2
-        let instr: u32 = helper::set_i_type_instruction(2, 1, 0x1, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(2, 1, SLLI as u8, 31);
         cpu::exec_slli(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 12);
     }
@@ -139,7 +146,7 @@ mod tests {
         // set x1=254
         helper::set_register_val(&mut cpu_test, 1, 254);
         // srli x31, x0, 2
-        let instr: u32 = helper::set_i_type_instruction(2, 1, 0x1, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(2, 1, SRLI as u8, 31);
         cpu::exec_srli(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 63);
     }
@@ -150,7 +157,7 @@ mod tests {
         // set x1=-2
         helper::set_register_val(&mut cpu_test, 1, -2);
         // srli x31, x0, 2
-        let instr: u32 = helper::set_i_type_instruction(2, 1, 0x5, 31, 0x13);
+        let instr: u32 = helper::set_i_type_instruction(2, 1, SRAI as u8, 31);
         cpu::exec_srai(&mut cpu_test, instr);
         // -2 >> 2 = -1
         assert_eq!(cpu_test.xregs.regs[31], std::u64::MAX);

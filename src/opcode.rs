@@ -127,7 +127,7 @@ pub fn imm_I(instr: u32) -> i32 {
 
 pub fn imm_U(instr: u32) -> u64 {
     // imm[31:12] = inst[31:12]
-    return (instr & 0xfffff999) as u64;
+    return (instr & 0xfffff800) as u64;
 }
 
 pub fn imm_J(instr: u32) -> u64 {

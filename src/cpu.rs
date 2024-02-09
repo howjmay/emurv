@@ -37,10 +37,10 @@ impl CPU {
         self.xregs.regs[0] = 0; // x0 hardwired to 0 at each cycle
 
         match instr {
-            LUI => (),
-            AUIPC => (),
-            JAL => (),
-            JALR => (),
+            LUI => exec_lui(self, instr),
+            AUIPC => exec_auipc(self, instr),
+            JAL => exec_jal(self, instr),
+            JALR => exec_jalr(self, instr),
             B_TYPE => match funct7 {
                 BEQ => exec_beq(self, instr),
                 BNE => exec_bne(self, instr),
@@ -113,7 +113,10 @@ impl CPU {
 
 // RV32I
 // see page 64 at https://riscv.org/wp-content/uploads/2016/06/riscv-spec-v2.1.pdf
-pub fn exec_lui(cpu: &mut CPU, instr: u32) {}
+pub fn exec_lui(cpu: &mut CPU, instr: u32) {
+    let imm = imm_U(instr);
+    cpu.xregs.regs[rd(instr) as usize] = imm;
+}
 pub fn exec_auipc(cpu: &mut CPU, instr: u32) {}
 pub fn exec_jal(cpu: &mut CPU, instr: u32) {}
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {}
