@@ -15,7 +15,15 @@ mod tests {
         assert_eq!(cpu_test.xregs.regs[5], 4 << 12);
     }
     #[test]
-    fn test_exec_auipc() {}
+    fn test_exec_auipc() {
+        let mut cpu_test = cpu::CPU::new();
+
+        let ori_pc = cpu_test.pc;
+        // auipc x5, 4
+        let instr: u32 = helper::set_u_type_instruction(4, 5, AUIPC as u8);
+        cpu::exec_auipc(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[5], ori_pc + (4 << 12));
+    }
     #[test]
     fn test_exec_jal() {}
     #[test]
