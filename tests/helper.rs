@@ -13,6 +13,10 @@ pub fn set_i_type_instruction(imm: i16, rs1: u8, funct3: u8, rd: u8) -> u32 {
 }
 
 pub fn set_u_type_instruction(imm: i32, rd: u8, opcode: u8) -> u32 {
+    return (imm as u32 & 0xfffff000) as u32 | ((rd as u32 & 0x1f) << 7) | ((opcode as u32) & 0x7f);
+}
+
+pub fn set_j_type_instruction(imm: i32, rd: u8, opcode: u8) -> u32 {
     // |31-12|11-7|6-0|
     // imm[20|10:1|11|19:12] = instr[31|30:21|20|19:12]
     let instr_imm = (((imm as i64) << 11) & 0x80000000)
