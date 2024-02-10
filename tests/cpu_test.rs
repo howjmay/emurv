@@ -190,9 +190,31 @@ mod tests {
         assert_eq!(cpu_test.xregs.regs[31], std::u64::MAX);
     }
     #[test]
-    fn test_exec_add() {}
+    fn test_exec_add() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // add x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(ADD as u8, 5, 6, 31);
+        cpu::exec_add(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 2);
+    }
     #[test]
-    fn test_exec_sub() {}
+    fn test_exec_sub() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // sub x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(SUB as u8, 6, 5, 31);
+        cpu::exec_sub(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 18446744073709551610); // 18446744073709551610 is -6
+    }
     #[test]
     fn test_exec_sll() {}
     #[test]

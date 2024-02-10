@@ -181,8 +181,16 @@ pub fn exec_srai(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
     cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64 >> imm) as u64;
 }
-pub fn exec_add(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sub(cpu: &mut CPU, instr: u32) {}
+pub fn exec_add(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
+        + cpu.xregs.regs[rs2(instr) as usize] as i64)
+        as u64;
+}
+pub fn exec_sub(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
+        - cpu.xregs.regs[rs2(instr) as usize] as i64)
+        as u64;
+}
 pub fn exec_sll(cpu: &mut CPU, instr: u32) {}
 pub fn exec_slt(cpu: &mut CPU, instr: u32) {}
 pub fn exec_sltu(cpu: &mut CPU, instr: u32) {}
