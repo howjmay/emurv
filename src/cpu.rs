@@ -121,7 +121,11 @@ pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
     let imm = (imm_U(instr) as i32) as i64;
     cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i64 + imm) as u64;
 }
-pub fn exec_jal(cpu: &mut CPU, instr: u32) {}
+pub fn exec_jal(cpu: &mut CPU, instr: u32) {
+    let imm = (imm_J(instr) as i32) as i64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
+    cpu.pc = (cpu.pc as i64 + imm) as u64;
+}
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {}
 pub fn exec_beq(cpu: &mut CPU, instr: u32) {}
 pub fn exec_bne(cpu: &mut CPU, instr: u32) {}

@@ -35,7 +35,16 @@ mod tests {
         assert_eq!(cpu_test.xregs.regs[5], (ori_pc as i64 + (-4 << 12)) as u64);
     }
     #[test]
-    fn test_exec_jal() {}
+    fn test_exec_jal() {
+        let mut cpu_test = cpu::CPU::new();
+
+        let ori_pc = cpu_test.pc;
+        // jal x5, 12
+        let instr: u32 = helper::set_u_type_instruction(12, 5, JAL as u8);
+        cpu::exec_jal(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[5], ori_pc + 4);
+        assert_eq!(cpu_test.pc, ori_pc + 12);
+    }
     #[test]
     fn test_exec_jalr() {}
     #[test]
