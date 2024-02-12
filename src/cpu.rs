@@ -8,7 +8,7 @@ use crate::registers;
 pub struct CPU {
     // integer registers
     pub xregs: registers::XREGS,
-    pc: u64,
+    pub pc: u64,
 
     pub bus: memory::BUS,
 }
@@ -37,10 +37,10 @@ impl CPU {
         self.xregs.regs[0] = 0; // x0 hardwired to 0 at each cycle
 
         match instr {
-            LUI => (),
-            AUIPC => (),
-            JAL => (),
-            JALR => (),
+            LUI => exec_lui(self, instr),
+            AUIPC => exec_auipc(self, instr),
+            JAL => exec_jal(self, instr),
+            JALR => exec_jalr(self, instr),
             B_TYPE => match funct7 {
                 BEQ => exec_beq(self, instr),
                 BNE => exec_bne(self, instr),
@@ -113,10 +113,24 @@ impl CPU {
 
 // RV32I
 // see page 64 at https://riscv.org/wp-content/uploads/2016/06/riscv-spec-v2.1.pdf
-pub fn exec_lui(cpu: &mut CPU, instr: u32) {}
-pub fn exec_auipc(cpu: &mut CPU, instr: u32) {}
-pub fn exec_jal(cpu: &mut CPU, instr: u32) {}
-pub fn exec_jalr(cpu: &mut CPU, instr: u32) {}
+pub fn exec_lui(cpu: &mut CPU, instr: u32) {
+    let imm = (imm_U(instr) as i32) as u64;
+    cpu.xregs.regs[rd(instr) as usize] = imm;
+}
+pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
+    let imm = (imm_U(instr) as i32) as i64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i64 + imm) as u64;
+}
+pub fn exec_jal(cpu: &mut CPU, instr: u32) {
+    let imm = (imm_J(instr) as i32) as i64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
+    cpu.pc = (cpu.pc as i64 + imm) as u64;
+}
+pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
+    let imm = (imm_J(instr) as i32) as i64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
+    cpu.pc = (cpu.pc as i64 + imm) as u64;
+}
 pub fn exec_beq(cpu: &mut CPU, instr: u32) {}
 pub fn exec_bne(cpu: &mut CPU, instr: u32) {}
 pub fn exec_blt(cpu: &mut CPU, instr: u32) {}
@@ -171,8 +185,16 @@ pub fn exec_srai(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
     cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64 >> imm) as u64;
 }
-pub fn exec_add(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sub(cpu: &mut CPU, instr: u32) {}
+pub fn exec_add(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
+        + cpu.xregs.regs[rs2(instr) as usize] as i64)
+        as u64;
+}
+pub fn exec_sub(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
+        - cpu.xregs.regs[rs2(instr) as usize] as i64)
+        as u64;
+}
 pub fn exec_sll(cpu: &mut CPU, instr: u32) {}
 pub fn exec_slt(cpu: &mut CPU, instr: u32) {}
 pub fn exec_sltu(cpu: &mut CPU, instr: u32) {}

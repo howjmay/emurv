@@ -122,18 +122,19 @@ pub fn imm_S(instr: u32) -> u64 {
 }
 
 pub fn imm_I(instr: u32) -> i32 {
-    return ((instr & 0xfff00000) as i32 >> 20);
+    // imm[11:0] = inst[31:20]
+    return (instr & 0xfff00000) as i32 >> 20;
 }
 
 pub fn imm_U(instr: u32) -> u64 {
     // imm[31:12] = inst[31:12]
-    return (instr & 0xfffff999) as u64;
+    return (instr & 0xfffff000) as u64;
 }
 
 pub fn imm_J(instr: u32) -> u64 {
     // imm[20|10:1|11|19:12] = inst[31|30:21|20|19:12]
-    return ((instr & 0x80000000) >> 11) as u64
-        | (instr & 0xff000)  as u64 // imm[19:12]
-        | ((instr >> 9) & 0x800)  as u64 // imm[11]
-        | ((instr >> 20) & 0x7fe) as u64; // imm[10:1]
+    return (((instr & 0x80000000) as i32 as i64 >> 11) as u64)// imm[20]
+    | ((instr & 0x3ff00000) >> 20) as u64 // imm[10:1]
+    | ((instr & 0x80000) >> 9) as u64 // imm[11]
+    | (instr & 0xff000) as u64; // imm[19:12]
 }
