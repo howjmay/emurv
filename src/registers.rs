@@ -3,7 +3,7 @@
 use core::fmt;
 
 pub struct XREGS {
-    pub regs: [u64; 32],
+    pub regs: [u32; 32],
 }
 
 impl XREGS {
@@ -29,7 +29,7 @@ mod tests {
     fn xregs_debug() {
         let mut xregs = XREGS::new();
         for i in 0..32 {
-            xregs.regs[i] = (i * 11) as u64;
+            xregs.regs[i] = (i * 11) as u32;
         }
         println!("{xregs:#?}")
     }

@@ -8,7 +8,7 @@ use crate::registers;
 pub struct CPU {
     // integer registers
     pub xregs: registers::XREGS,
-    pub pc: u64,
+    pub pc: u32,
 
     pub bus: memory::BUS,
 }
@@ -114,22 +114,22 @@ impl CPU {
 // RV32I
 // see page 64 at https://riscv.org/wp-content/uploads/2016/06/riscv-spec-v2.1.pdf
 pub fn exec_lui(cpu: &mut CPU, instr: u32) {
-    let imm = (imm_U(instr) as i32) as u64;
+    let imm = (imm_U(instr) as i32) as u32;
     cpu.xregs.regs[rd(instr) as usize] = imm;
 }
 pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
-    let imm = (imm_U(instr) as i32) as i64;
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i64 + imm) as u64;
+    let imm = imm_U(instr) as i32;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i32 + imm) as u32;
 }
 pub fn exec_jal(cpu: &mut CPU, instr: u32) {
-    let imm = (imm_J(instr) as i32) as i64;
+    let imm = imm_J(instr) as i32;
     cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
-    cpu.pc = (cpu.pc as i64 + imm) as u64;
+    cpu.pc = (cpu.pc as i32 + imm) as u32;
 }
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
-    let imm = (imm_J(instr) as i32) as i64;
+    let imm = imm_J(instr) as i32;
     cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
-    cpu.pc = (cpu.pc as i64 + imm) as u64;
+    cpu.pc = (cpu.pc as i32 + imm) as u32;
 }
 pub fn exec_beq(cpu: &mut CPU, instr: u32) {}
 pub fn exec_bne(cpu: &mut CPU, instr: u32) {}
@@ -150,50 +150,50 @@ pub fn exec_sw(cpu: &mut CPU, instr: u32) {}
 pub fn exec_sd(cpu: &mut CPU, instr: u32) {}
 pub fn exec_addi(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] + imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] + imm as u32;
 }
 pub fn exec_slti(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
     cpu.xregs.regs[rd(instr) as usize] =
-        ((cpu.xregs.regs[rs1(instr) as usize] as i64) < (imm as i64)) as u64;
+        ((cpu.xregs.regs[rs1(instr) as usize] as i32) < (imm as i32)) as u32;
 }
 pub fn exec_sltiu(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] < imm as u64) as u64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] < imm as u32) as u32;
 }
 pub fn exec_xori(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] ^ imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] ^ imm as u32;
 }
 pub fn exec_ori(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] | imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] | imm as u32;
 }
 pub fn exec_andi(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] & imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] & imm as u32;
 }
 pub fn exec_slli(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] << imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] << imm as u32;
 }
 pub fn exec_srli(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] >> imm as u64;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] >> imm as u32;
 }
 pub fn exec_srai(cpu: &mut CPU, instr: u32) {
     let imm = imm_I(instr);
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64 >> imm) as u64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i32 >> imm) as u32;
 }
 pub fn exec_add(cpu: &mut CPU, instr: u32) {
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
-        + cpu.xregs.regs[rs2(instr) as usize] as i64)
-        as u64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i32
+        + cpu.xregs.regs[rs2(instr) as usize] as i32)
+        as u32;
 }
 pub fn exec_sub(cpu: &mut CPU, instr: u32) {
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i64
-        - cpu.xregs.regs[rs2(instr) as usize] as i64)
-        as u64;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i32
+        - cpu.xregs.regs[rs2(instr) as usize] as i32)
+        as u32;
 }
 pub fn exec_sll(cpu: &mut CPU, instr: u32) {}
 pub fn exec_slt(cpu: &mut CPU, instr: u32) {}
