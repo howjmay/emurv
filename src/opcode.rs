@@ -100,7 +100,7 @@ pub fn rs2(instr: u32) -> u32 {
 
 pub fn shamt(instr: u32) -> u32 {
     // shamt[4:5] = imm[5:0]
-    return (imm_I(instr) & 0x1f) as u32;
+    return (imm_i(instr) & 0x1f) as u32;
 }
 
 pub fn csr(instr: u32) -> u32 {
@@ -108,7 +108,7 @@ pub fn csr(instr: u32) -> u32 {
     return ((instr & 0xfff00000) >> 20) as u32;
 }
 
-pub fn imm_B(instr: u32) -> u32 {
+pub fn imm_b(instr: u32) -> u32 {
     // imm[12|10:5|4:1|11] = inst[31|30:25|11:8|7]
     return ((instr & 0x80000000) >> 19) as u32
         | ((instr & 0x80) << 4) as u32 // imm[11]
@@ -116,22 +116,22 @@ pub fn imm_B(instr: u32) -> u32 {
         | ((instr >> 7) & 0x1e) as u32; // imm[4:1]
 }
 
-pub fn imm_S(instr: u32) -> u32 {
+pub fn imm_s(instr: u32) -> u32 {
     // imm[11:5] = inst[31:25], imm[4:0] = inst[11:7]
     return ((instr & 0xfe000000) >> 20) as u32 | ((instr >> 7) & 0x1f) as u32;
 }
 
-pub fn imm_I(instr: u32) -> i32 {
+pub fn imm_i(instr: u32) -> i32 {
     // imm[11:0] = inst[31:20]
     return (instr & 0xfff00000) as i32 >> 20;
 }
 
-pub fn imm_U(instr: u32) -> u32 {
+pub fn imm_u(instr: u32) -> u32 {
     // imm[31:12] = inst[31:12]
     return (instr & 0xfffff000) as u32;
 }
 
-pub fn imm_J(instr: u32) -> u32 {
+pub fn imm_j(instr: u32) -> u32 {
     // imm[20|10:1|11|19:12] = inst[31|30:21|20|19:12]
     return (((instr & 0x80000000) as i32 >> 11) as u32)// imm[20]
     | ((instr & 0x3ff00000) >> 20) as u32 // imm[10:1]
