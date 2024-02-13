@@ -127,9 +127,10 @@ pub fn exec_jal(cpu: &mut CPU, instr: u32) {
     cpu.pc = (cpu.pc as i32 + imm) as u32;
 }
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
-    let imm = imm_j(instr) as i32;
+    let imm = imm_i(instr) as i32;
     cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
-    cpu.pc = (cpu.pc as i32 + imm) as u32;
+    // ignore the last 1 bit with 0xfffffffe
+    cpu.pc = (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32 & 0xfffffffe;
 }
 pub fn exec_beq(cpu: &mut CPU, instr: u32) {}
 pub fn exec_bne(cpu: &mut CPU, instr: u32) {}

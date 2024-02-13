@@ -9,12 +9,12 @@ mod tests {
     fn test_exec_lui() {
         let mut cpu_test = cpu::CPU::new();
 
-        // lui x5, 4
+        // lui x5, (4<<12)
         let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], 4 << 12);
 
-        // lui x5, -4
+        // lui x5, (-4<<12)
         let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], (-4 << 12) as u32);
@@ -24,12 +24,12 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         let ori_pc = cpu_test.pc;
-        // auipc x5, 4
+        // auipc x5, (4<<12)
         let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], ori_pc + (4 << 12));
 
-        // auipc x5, -4
+        // auipc x5, (-4<<12)
         let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
         assert_eq!(
@@ -39,6 +39,7 @@ mod tests {
     }
     #[test]
     fn test_exec_jal() {
+        // TODO add test case for imm is a negative number
         let mut cpu_test = cpu::CPU::new();
 
         let ori_pc = cpu_test.pc;
@@ -49,7 +50,19 @@ mod tests {
         assert_eq!(cpu_test.pc, ori_pc + 12);
     }
     #[test]
-    fn test_exec_jalr() {}
+    fn test_exec_jalr() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        let ori_pc = cpu_test.pc;
+        // set x1=3
+        helper::set_register_val(&mut cpu_test, 1, 3);
+        // jalr x5, 12
+        let instr: u32 = helper::set_i_type_instruction(12, 1, JALR as u8, 5);
+        cpu::exec_jalr(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[5], ori_pc + 4);
+        assert_eq!(cpu_test.pc, (3 + 12) & 0xfffffffe);
+    }
     #[test]
     fn test_exec_beq() {}
     #[test]
