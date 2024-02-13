@@ -10,14 +10,14 @@ mod tests {
         let mut cpu_test = cpu::CPU::new();
 
         // lui x5, 4
-        let instr: u32 = helper::set_u_type_instruction(4, 5, LUI as u8);
+        let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], 4 << 12);
 
         // lui x5, -4
-        let instr: u32 = helper::set_u_type_instruction(-4, 5, LUI as u8);
+        let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[5], -(4 << 12) as u32);
+        assert_eq!(cpu_test.xregs.regs[5], (-4 << 12) as u32);
     }
     #[test]
     fn test_exec_auipc() {
@@ -25,14 +25,17 @@ mod tests {
 
         let ori_pc = cpu_test.pc;
         // auipc x5, 4
-        let instr: u32 = helper::set_u_type_instruction(4, 5, AUIPC as u8);
+        let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], ori_pc + (4 << 12));
 
         // auipc x5, -4
-        let instr: u32 = helper::set_u_type_instruction(-4, 5, AUIPC as u8);
+        let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[5], (ori_pc as i64 + (-4 << 12)) as u32);
+        assert_eq!(
+            cpu_test.xregs.regs[5],
+            (ori_pc as i32).wrapping_add(-4 << 12) as u32
+        );
     }
     #[test]
     fn test_exec_jal() {

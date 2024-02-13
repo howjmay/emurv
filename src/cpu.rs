@@ -119,7 +119,7 @@ pub fn exec_lui(cpu: &mut CPU, instr: u32) {
 }
 pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
     let imm = imm_u(instr) as i32;
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i32 + imm) as u32;
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i32).wrapping_add(imm) as u32;
 }
 pub fn exec_jal(cpu: &mut CPU, instr: u32) {
     let imm = imm_j(instr) as i32;

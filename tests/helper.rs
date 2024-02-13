@@ -13,9 +13,7 @@ pub fn set_i_type_instruction(imm: i16, rs1: u8, funct3: u8, rd: u8) -> u32 {
 }
 
 pub fn set_u_type_instruction(imm: i32, rd: u8, opcode: u8) -> u32 {
-    return ((imm << 12) as u32 & 0xfffff000) as u32
-        | ((rd as u32 & 0x1f) << 7)
-        | ((opcode as u32) & 0x7f);
+    return (imm as u32 & 0xfffff000) as u32 | ((rd as u32 & 0x1f) << 7) | ((opcode as u32) & 0x7f);
 }
 
 pub fn set_j_type_instruction(imm: i32, rd: u8, opcode: u8) -> u32 {
