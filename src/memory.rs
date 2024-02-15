@@ -1,7 +1,7 @@
 // pub mod memory;
 
-pub const MEM_BASE: u64 = 0x80000000; // defined in QEMU
-pub const MEM_SIZE: u64 = 1024;
+pub const MEM_BASE: u32 = 0x80000000; // defined in QEMU
+pub const MEM_SIZE: u32 = 1024;
 
 #[derive(Debug)]
 pub struct BUS {
@@ -12,10 +12,10 @@ impl BUS {
     pub fn new() -> Self {
         BUS { mem: MEMORY::new() }
     }
-    pub fn load(self, addr: u64, size: u64) -> u32 {
+    pub fn load(self, addr: u32, size: u32) -> u32 {
         return self.mem.load(addr, size) as u32;
     }
-    pub fn store(&mut self, addr: u64, size: u64, value: u64) {
+    pub fn store(&mut self, addr: u32, size: u32, value: u32) {
         self.mem.store(addr, size, value);
     }
 }
@@ -32,78 +32,78 @@ impl MEMORY {
         }
     }
 
-    fn load(self, addr: u64, size: u64) -> u64 {
+    fn load(self, addr: u32, size: u32) -> u32 {
         match size {
             8 => return self.load8(addr),
             16 => return self.load16(addr),
             32 => return self.load32(addr),
-            64 => return self.load64(addr),
+            // 64 => return self.load64(addr),
             _ => panic!("wrong load size"),
         }
     }
-    fn store(&mut self, addr: u64, size: u64, value: u64) {
+    fn store(&mut self, addr: u32, size: u32, value: u32) {
         match size {
             8 => self.store8(addr, value),
             16 => self.store16(addr, value),
             32 => self.store32(addr, value),
-            64 => self.store64(addr, value),
+            // 64 => self.store64(addr, value),
             _ => panic!("wrong store size"),
         }
     }
 
     // load funcs
-    fn load8(self, addr: u64) -> u64 {
+    fn load8(self, addr: u32) -> u32 {
         let index = (addr - MEM_BASE) as usize;
-        return self.mem[index] as u64;
+        return self.mem[index] as u32;
     }
-    fn load16(self, addr: u64) -> u64 {
+    fn load16(self, addr: u32) -> u32 {
         let index = (addr - MEM_BASE) as usize;
-        return self.mem[index] as u64 | ((self.mem[index + 1] as u64) << 8);
+        return self.mem[index] as u32 | ((self.mem[index + 1] as u32) << 8);
     }
-    fn load32(self, addr: u64) -> u64 {
+    fn load32(self, addr: u32) -> u32 {
         let index = (addr - MEM_BASE) as usize;
-        return self.mem[index] as u64
-            | ((self.mem[index + 1] as u64) << 8)
-            | ((self.mem[index + 2] as u64) << 16)
-            | ((self.mem[index + 3] as u64) << 24);
+        return self.mem[index] as u32
+            | ((self.mem[index + 1] as u32) << 8)
+            | ((self.mem[index + 2] as u32) << 16)
+            | ((self.mem[index + 3] as u32) << 24);
     }
-    fn load64(self, addr: u64) -> u64 {
-        let index = (addr - MEM_BASE) as usize;
-        return self.mem[index] as u64
-            | ((self.mem[index + 1] as u64) << 8)
-            | ((self.mem[index + 2] as u64) << 16)
-            | ((self.mem[index + 3] as u64) << 24)
-            | ((self.mem[index + 4] as u64) << 32)
-            | ((self.mem[index + 5] as u64) << 40)
-            | ((self.mem[index + 6] as u64) << 48)
-            | ((self.mem[index + 7] as u64) << 56);
-    }
+    // fn load64(self, addr: u32) -> u32 {
+    //     let index = (addr - MEM_BASE) as usize;
+    //     return self.mem[index] as u32
+    //         | ((self.mem[index + 1] as u32) << 8)
+    //         | ((self.mem[index + 2] as u32) << 16)
+    //         | ((self.mem[index + 3] as u32) << 24)
+    //         | ((self.mem[index + 4] as u32) << 32)
+    //         | ((self.mem[index + 5] as u32) << 40)
+    //         | ((self.mem[index + 6] as u32) << 48)
+    //         | ((self.mem[index + 7] as u32) << 56);
+    // }
 
     // store funcs
-    fn store8(&mut self, addr: u64, value: u64) {
+    fn store8(&mut self, addr: u32, value: u32) {
         let index = (addr - MEM_BASE) as usize;
-        self.mem[index] = (value & (std::u8::MAX as u64)) as u8;
+        self.mem[index] = (value & (std::u8::MAX as u32)) as u8;
     }
-    fn store16(&mut self, addr: u64, value: u64) {
+    fn store16(&mut self, addr: u32, value: u32) {
         let index = (addr - MEM_BASE) as usize;
-        self.mem[index] = (value & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u64)) as u8;
+        self.mem[index] = (value & (std::u8::MAX as u32)) as u8;
+        self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u32)) as u8;
     }
-    fn store32(&mut self, addr: u64, value: u64) {
+    fn store32(&mut self, addr: u32, value: u32) {
         let index = (addr - MEM_BASE) as usize;
-        self.mem[index] = (value & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 2] = ((value >> 16) & (std::u8::MAX as u64)) as u8;
+        self.mem[index] = (value & (std::u8::MAX as u32)) as u8;
+        self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u32)) as u8;
+        self.mem[index + 2] = ((value >> 16) & (std::u8::MAX as u32)) as u8;
     }
-    fn store64(&mut self, addr: u64, value: u64) {
-        let index = (addr - MEM_BASE) as usize;
-        self.mem[index] = (value & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 2] = ((value >> 16) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 3] = ((value >> 24) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 4] = ((value >> 32) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 5] = ((value >> 40) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 6] = ((value >> 48) & (std::u8::MAX as u64)) as u8;
-        self.mem[index + 7] = ((value >> 56) & (std::u8::MAX as u64)) as u8;
-    }
+    // fn store64(&mut self, addr: u32, value: u32) {
+    //     let index = (addr - MEM_BASE) as usize;
+    //     self.mem[index] = (value & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 2] = ((value >> 16) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 3] = ((value >> 24) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 4] = ((value >> 32) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 5] = ((value >> 40) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 6] = ((value >> 48) & (std::u8::MAX as u32)) as u8;
+    //     self.mem[index + 7] = ((value >> 56) & (std::u8::MAX as u32)) as u8;
+    // }
 }

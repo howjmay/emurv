@@ -9,33 +9,37 @@ mod tests {
     fn test_exec_lui() {
         let mut cpu_test = cpu::CPU::new();
 
-        // lui x5, 4
+        // lui x5, (4<<12)
         let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], 4 << 12);
 
-        // lui x5, -4
-        let instr: u32 = helper::set_u_type_instruction(-(4 << 12), 5, LUI as u8);
+        // lui x5, (-4<<12)
+        let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, LUI as u8);
         cpu::exec_lui(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[5], -(4 << 12) as u64);
+        assert_eq!(cpu_test.xregs.regs[5], (-4 << 12) as u32);
     }
     #[test]
     fn test_exec_auipc() {
         let mut cpu_test = cpu::CPU::new();
 
         let ori_pc = cpu_test.pc;
-        // auipc x5, 4
+        // auipc x5, (4<<12)
         let instr: u32 = helper::set_u_type_instruction(4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[5], ori_pc + (4 << 12));
 
-        // auipc x5, -4
-        let instr: u32 = helper::set_u_type_instruction(-(4 << 12), 5, AUIPC as u8);
+        // auipc x5, (-4<<12)
+        let instr: u32 = helper::set_u_type_instruction(-4 << 12, 5, AUIPC as u8);
         cpu::exec_auipc(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[5], (ori_pc as i64 + (-4 << 12)) as u64);
+        assert_eq!(
+            cpu_test.xregs.regs[5],
+            (ori_pc as i32).wrapping_add(-4 << 12) as u32
+        );
     }
     #[test]
     fn test_exec_jal() {
+        // TODO add test case for imm is a negative number
         let mut cpu_test = cpu::CPU::new();
 
         let ori_pc = cpu_test.pc;
@@ -46,7 +50,19 @@ mod tests {
         assert_eq!(cpu_test.pc, ori_pc + 12);
     }
     #[test]
-    fn test_exec_jalr() {}
+    fn test_exec_jalr() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        let ori_pc = cpu_test.pc;
+        // set x1=3
+        helper::set_register_val(&mut cpu_test, 1, 3);
+        // jalr x5, 12
+        let instr: u32 = helper::set_i_type_instruction(12, 1, JALR as u8, 5);
+        cpu::exec_jalr(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[5], ori_pc + 4);
+        assert_eq!(cpu_test.pc, (3 + 12) & 0xfffffffe);
+    }
     #[test]
     fn test_exec_beq() {}
     #[test]
@@ -187,7 +203,7 @@ mod tests {
         let instr: u32 = helper::set_i_type_instruction(2, 1, SRAI as u8, 31);
         cpu::exec_srai(&mut cpu_test, instr);
         // -2 >> 2 = -1
-        assert_eq!(cpu_test.xregs.regs[31], std::u64::MAX);
+        assert_eq!(cpu_test.xregs.regs[31], std::u32::MAX);
     }
     #[test]
     fn test_exec_add() {
@@ -213,7 +229,7 @@ mod tests {
         // sub x31, x5, x6
         let instr: u32 = helper::set_r_type_instruction(SUB as u8, 6, 5, 31);
         cpu::exec_sub(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[31], 18446744073709551610); // 18446744073709551610 is -6
+        assert_eq!(cpu_test.xregs.regs[31], 0xfffffffa); // 0xfffffffa is -6
     }
     #[test]
     fn test_exec_sll() {}
