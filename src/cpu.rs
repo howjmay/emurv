@@ -132,12 +132,43 @@ pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
     // ignore the last 1 bit with 0xfffffffe
     cpu.pc = (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32 & 0xfffffffe;
 }
-pub fn exec_beq(cpu: &mut CPU, instr: u32) {}
-pub fn exec_bne(cpu: &mut CPU, instr: u32) {}
-pub fn exec_blt(cpu: &mut CPU, instr: u32) {}
-pub fn exec_bge(cpu: &mut CPU, instr: u32) {}
-pub fn exec_bltu(cpu: &mut CPU, instr: u32) {}
-pub fn exec_bgeu(cpu: &mut CPU, instr: u32) {}
+pub fn exec_beq(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if cpu.xregs.regs[rs1(instr) as usize] == cpu.xregs.regs[rs2(instr) as usize] {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
+pub fn exec_bne(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if cpu.xregs.regs[rs1(instr) as usize] != cpu.xregs.regs[rs2(instr) as usize] {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
+pub fn exec_blt(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if (cpu.xregs.regs[rs1(instr) as usize] as i32) < (cpu.xregs.regs[rs2(instr) as usize] as i32) {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
+pub fn exec_bge(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if (cpu.xregs.regs[rs1(instr) as usize] as i32) >= (cpu.xregs.regs[rs2(instr) as usize] as i32)
+    {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
+pub fn exec_bltu(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if cpu.xregs.regs[rs1(instr) as usize] < cpu.xregs.regs[rs2(instr) as usize] {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
+pub fn exec_bgeu(cpu: &mut CPU, instr: u32) {
+    let imm = imm_b(instr) as i32;
+    if cpu.xregs.regs[rs1(instr) as usize] >= rs2(instr) {
+        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    }
+}
 pub fn exec_lb(cpu: &mut CPU, instr: u32) {}
 pub fn exec_lh(cpu: &mut CPU, instr: u32) {}
 pub fn exec_lw(cpu: &mut CPU, instr: u32) {}

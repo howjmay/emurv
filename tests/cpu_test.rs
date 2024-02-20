@@ -64,17 +64,143 @@ mod tests {
         assert_eq!(cpu_test.pc, (3 + 12) & 0xfffffffe);
     }
     #[test]
-    fn test_exec_beq() {}
+    fn test_exec_beq() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, 3);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, 3);
+        // beq x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BEQ as u8);
+        cpu::exec_beq(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, 4);
+        // beq x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BEQ as u8);
+        cpu::exec_beq(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
-    fn test_exec_bne() {}
+    fn test_exec_bne() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, 3);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, 3);
+        // bne x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BNE as u8);
+        cpu::exec_bne(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc, ori_pc);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, 4);
+        // bne x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BNE as u8);
+        cpu::exec_bne(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
-    fn test_exec_blt() {}
+    fn test_exec_blt() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, 2);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, 3);
+        // blt x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BLT as u8);
+        cpu::exec_blt(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc, ori_pc);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, 1);
+        // blt x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BLT as u8);
+        cpu::exec_blt(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
-    fn test_exec_bge() {}
+    fn test_exec_bge() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, 4);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, 3);
+        // bge x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BGE as u8);
+        cpu::exec_bge(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc, ori_pc);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, 5);
+        // bge x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BGE as u8);
+        cpu::exec_bge(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
-    fn test_exec_bltu() {}
+    fn test_exec_bltu() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, -2);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, -1);
+        // bltu x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BLTU as u8);
+        cpu::exec_bltu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc, ori_pc);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, 3);
+        // bltu x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BLTU as u8);
+        cpu::exec_bltu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
-    fn test_exec_bgeu() {}
+    fn test_exec_bgeu() {
+        // TODO add test case for imm is a negative number
+        let mut cpu_test = cpu::CPU::new();
+
+        cpu_test.pc = 500;
+        let ori_pc = cpu_test.pc;
+        // set x7=3
+        helper::set_register_val(&mut cpu_test, 7, -1);
+        // set x8=3
+        helper::set_register_val(&mut cpu_test, 8, 3);
+        // bgeu x8, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 8, BGEU as u8);
+        cpu::exec_bgeu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc, ori_pc);
+
+        // set x9=4
+        helper::set_register_val(&mut cpu_test, 9, -2);
+        // bgeu x9, x7, 12
+        let instr: u32 = helper::set_b_type_instruction(12, 7, 9, BGEU as u8);
+        cpu::exec_bgeu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
+    }
     #[test]
     fn test_exec_lb() {}
     #[test]
@@ -214,7 +340,7 @@ mod tests {
         // set x6=4
         helper::set_register_val(&mut cpu_test, 6, 4);
         // add x31, x5, x6
-        let instr: u32 = helper::set_r_type_instruction(ADD as u8, 5, 6, 31);
+        let instr: u32 = helper::set_r_type_instruction(5, 6, ADD as u8, 31);
         cpu::exec_add(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 2);
     }
@@ -227,7 +353,7 @@ mod tests {
         // set x6=4
         helper::set_register_val(&mut cpu_test, 6, 4);
         // sub x31, x5, x6
-        let instr: u32 = helper::set_r_type_instruction(SUB as u8, 6, 5, 31);
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SUB as u8, 31);
         cpu::exec_sub(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0xfffffffa); // 0xfffffffa is -6
     }
