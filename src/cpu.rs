@@ -208,9 +208,24 @@ pub fn exec_lwu(cpu: &mut CPU, instr: u32) {
         .bus
         .load(cpu.xregs.regs[rs1(instr) as usize].wrapping_add(imm), 32);
 }
-pub fn exec_sb(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sh(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sw(cpu: &mut CPU, instr: u32) {}
+pub fn exec_sb(cpu: &mut CPU, instr: u32) {
+    let imm = imm_s(instr) as i32;
+    let addr = (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32;
+    let val = cpu.xregs.regs[rs2(instr) as usize] & std::u8::MAX as u32;
+    cpu.bus.store(addr, 8, val);
+}
+pub fn exec_sh(cpu: &mut CPU, instr: u32) {
+    let imm = imm_s(instr) as i32;
+    let addr = (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32;
+    let val = cpu.xregs.regs[rs2(instr) as usize] & std::u16::MAX as u32;
+    cpu.bus.store(addr, 16, val);
+}
+pub fn exec_sw(cpu: &mut CPU, instr: u32) {
+    let imm = imm_s(instr) as i32;
+    let addr = (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32;
+    let val = cpu.xregs.regs[rs2(instr) as usize] & std::u32::MAX as u32;
+    cpu.bus.store(addr, 32, val);
+}
 pub fn exec_addi(cpu: &mut CPU, instr: u32) {
     let imm = imm_i(instr);
     cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] + imm as u32;

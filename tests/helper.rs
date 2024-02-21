@@ -1,6 +1,6 @@
 use emurv::{
     cpu,
-    opcode::{ADDI, B_TYPE, I_TYPE, LOAD, LUI, R_TYPE},
+    opcode::{ADDI, B_TYPE, I_TYPE, LOAD, LUI, R_TYPE, S_TYPE},
 };
 
 pub fn set_r_type_instruction(rs2: u8, rs1: u8, funct3: u8, rd: u8) -> u32 {
@@ -19,6 +19,18 @@ pub fn set_i_type_instruction(imm: i16, rs1: u8, funct3: u8, rd: u8) -> u32 {
         | ((funct3 as u32 & 0x7) << 12)
         | ((rd as u32 & 0x1f) << 7)
         | ((I_TYPE as u32) & 0x7f);
+}
+
+pub fn set_s_type_instruction(imm: i16, rs2: u8, rs1: u8, funct3: u8) -> u32 {
+    let imm11_5 = (imm & 0x7f0) as u32;
+    let imm4_0 = (imm & 0x1f) as u32;
+
+    return (imm11_5 << 20)
+        | ((rs2 as u32 & 0x1f) << 20)
+        | ((rs1 as u32 & 0x1f) << 15)
+        | ((funct3 as u32 & 0x7) << 12)
+        | (imm4_0 << 7)
+        | ((S_TYPE as u32) & 0x7f);
 }
 
 pub fn set_load_type_instruction(imm: i16, rs1: u8, funct3: u8, rd: u8) -> u32 {
