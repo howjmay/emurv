@@ -2,6 +2,7 @@
 
 use core::fmt;
 
+#[derive(Clone, Copy)]
 pub struct XREGS {
     pub regs: [u32; 32],
 }

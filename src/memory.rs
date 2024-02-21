@@ -3,7 +3,7 @@
 pub const MEM_BASE: u32 = 0x80000000; // defined in QEMU
 pub const MEM_SIZE: u32 = 1024;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct BUS {
     mem: MEMORY,
 }
@@ -20,7 +20,7 @@ impl BUS {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct MEMORY {
     mem: [u8; MEM_SIZE as usize],
 }
