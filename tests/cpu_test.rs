@@ -233,7 +233,7 @@ mod tests {
     fn test_exec_lw() {
         let mut cpu_test = cpu::CPU::new();
         let offset = 3;
-        let val = 11;
+        let val = (-2 as i32) as u32;
         let rd = 5 + MEM_BASE;
         cpu_test.bus.store(rd + offset, 32, val);
         // set x1=5+MEM_BASE
@@ -247,7 +247,7 @@ mod tests {
     fn test_exec_lbu() {
         let mut cpu_test = cpu::CPU::new();
         let offset = 3;
-        let val = 11;
+        let val = (-2 as i32) as u32;
         let rd = 5 + MEM_BASE;
         cpu_test.bus.store(rd + offset, 8, val);
         // set x1=5+MEM_BASE
@@ -255,12 +255,36 @@ mod tests {
         // lbu x31, x1, 3
         let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LBU as u8, 31);
         cpu::exec_lbu(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[31], val);
+        assert_eq!(cpu_test.xregs.regs[31], val & std::u8::MAX as u32);
     }
     #[test]
-    fn test_exec_lhu() {}
+    fn test_exec_lhu() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 16, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lhu x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LHU as u8, 31);
+        cpu::exec_lhu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val & std::u16::MAX as u32);
+    }
     #[test]
-    fn test_exec_lwu() {}
+    fn test_exec_lwu() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 32, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lwu x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LWU as u8, 31);
+        cpu::exec_lwu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val & std::u32::MAX);
+    }
     #[test]
     fn test_exec_sb() {}
     #[test]

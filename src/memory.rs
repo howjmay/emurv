@@ -94,6 +94,7 @@ impl MEMORY {
         self.mem[index] = (value & (std::u8::MAX as u32)) as u8;
         self.mem[index + 1] = ((value >> 8) & (std::u8::MAX as u32)) as u8;
         self.mem[index + 2] = ((value >> 16) & (std::u8::MAX as u32)) as u8;
+        self.mem[index + 3] = ((value >> 24) & (std::u8::MAX as u32)) as u8;
     }
     // fn store64(&mut self, addr: u32, value: u32) {
     //     let index = (addr - MEM_BASE) as usize;
