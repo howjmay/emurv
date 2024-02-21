@@ -3,7 +3,7 @@ mod helper;
 #[cfg(test)]
 mod tests {
     use crate::helper;
-    use emurv::{cpu, opcode::*};
+    use emurv::{cpu, memory::MEM_BASE, opcode::*};
 
     #[test]
     fn test_exec_lui() {
@@ -202,15 +202,61 @@ mod tests {
         assert_eq!(cpu_test.pc as i32, (ori_pc as i32) + 12 - 4);
     }
     #[test]
-    fn test_exec_lb() {}
+    fn test_exec_lb() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 8, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lb x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LB as u8, 31);
+        cpu::exec_lb(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val);
+    }
     #[test]
-    fn test_exec_lh() {}
+    fn test_exec_lh() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 16, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lh x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LH as u8, 31);
+        cpu::exec_lh(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val);
+    }
     #[test]
-    fn test_exec_lw() {}
+    fn test_exec_lw() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = 11;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 32, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lw x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LW as u8, 31);
+        cpu::exec_lw(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val);
+    }
     #[test]
-    fn test_exec_ld() {}
-    #[test]
-    fn test_exec_lbu() {}
+    fn test_exec_lbu() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = 11;
+        let rd = 5 + MEM_BASE;
+        cpu_test.bus.store(rd + offset, 8, val);
+        // set x1=5+MEM_BASE
+        helper::set_register_val(&mut cpu_test, 1, rd as i32);
+        // lbu x31, x1, 3
+        let instr: u32 = helper::set_load_type_instruction(offset as i16, 1, LBU as u8, 31);
+        cpu::exec_lbu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], val);
+    }
     #[test]
     fn test_exec_lhu() {}
     #[test]
@@ -221,8 +267,6 @@ mod tests {
     fn test_exec_sh() {}
     #[test]
     fn test_exec_sw() {}
-    #[test]
-    fn test_exec_sd() {}
     #[test]
     fn test_exec_addi() {
         let mut cpu_test = cpu::CPU::new();
@@ -357,40 +401,40 @@ mod tests {
         cpu::exec_sub(&mut cpu_test, instr);
         assert_eq!(cpu_test.xregs.regs[31], 0xfffffffa); // 0xfffffffa is -6
     }
-    #[test]
-    fn test_exec_sll() {}
-    #[test]
-    fn test_exec_slt() {}
-    #[test]
-    fn test_exec_sltu() {}
-    #[test]
-    fn test_exec_xor() {}
-    #[test]
-    fn test_exec_srl() {}
-    #[test]
-    fn test_exec_sra() {}
-    #[test]
-    fn test_exec_or() {}
-    #[test]
-    fn test_exec_and() {}
-    #[test]
-    fn test_exec_fence() {}
-    #[test]
-    fn test_exec_fence_i() {}
-    #[test]
-    fn test_exec_ecall() {}
-    #[test]
-    fn test_exec_ebreak() {}
-    #[test]
-    fn test_exec_csrrw() {}
-    #[test]
-    fn test_exec_csrrs() {}
-    #[test]
-    fn test_exec_csrrc() {}
-    #[test]
-    fn test_exec_csrrwi() {}
-    #[test]
-    fn test_exec_csrrsi() {}
-    #[test]
-    fn test_exec_csrrci() {}
+    // #[test]
+    // fn test_exec_sll() {}
+    // #[test]
+    // fn test_exec_slt() {}
+    // #[test]
+    // fn test_exec_sltu() {}
+    // #[test]
+    // fn test_exec_xor() {}
+    // #[test]
+    // fn test_exec_srl() {}
+    // #[test]
+    // fn test_exec_sra() {}
+    // #[test]
+    // fn test_exec_or() {}
+    // #[test]
+    // fn test_exec_and() {}
+    // #[test]
+    // fn test_exec_fence() {}
+    // #[test]
+    // fn test_exec_fence_i() {}
+    // #[test]
+    // fn test_exec_ecall() {}
+    // #[test]
+    // fn test_exec_ebreak() {}
+    // #[test]
+    // fn test_exec_csrrw() {}
+    // #[test]
+    // fn test_exec_csrrs() {}
+    // #[test]
+    // fn test_exec_csrrc() {}
+    // #[test]
+    // fn test_exec_csrrwi() {}
+    // #[test]
+    // fn test_exec_csrrsi() {}
+    // #[test]
+    // fn test_exec_csrrci() {}
 }
