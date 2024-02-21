@@ -286,11 +286,47 @@ mod tests {
         assert_eq!(cpu_test.xregs.regs[31], val & std::u32::MAX);
     }
     #[test]
-    fn test_exec_sb() {}
+    fn test_exec_sb() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        helper::set_register_val(&mut cpu_test, 29, rd as i32);
+        helper::set_register_val(&mut cpu_test, 30, val as i32);
+        // sb x30, x29, 3
+        let instr: u32 = helper::set_s_type_instruction(offset as i16, 30, 29, SB as u8);
+        cpu::exec_sb(&mut cpu_test, instr);
+        assert_eq!(cpu_test.bus.load(rd + offset, 8), val & std::u8::MAX as u32);
+    }
     #[test]
-    fn test_exec_sh() {}
+    fn test_exec_sh() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        helper::set_register_val(&mut cpu_test, 29, rd as i32);
+        helper::set_register_val(&mut cpu_test, 30, val as i32);
+        // sh x30, x29, 3
+        let instr: u32 = helper::set_s_type_instruction(offset as i16, 30, 29, SH as u8);
+        cpu::exec_sh(&mut cpu_test, instr);
+        assert_eq!(
+            cpu_test.bus.load(rd + offset, 16),
+            val & std::u16::MAX as u32
+        );
+    }
     #[test]
-    fn test_exec_sw() {}
+    fn test_exec_sw() {
+        let mut cpu_test = cpu::CPU::new();
+        let offset = 3;
+        let val = (-2 as i32) as u32;
+        let rd = 5 + MEM_BASE;
+        helper::set_register_val(&mut cpu_test, 29, rd as i32);
+        helper::set_register_val(&mut cpu_test, 30, val as i32);
+        // sw x30, x29, 3
+        let instr: u32 = helper::set_s_type_instruction(offset as i16, 30, 29, SW as u8);
+        cpu::exec_sw(&mut cpu_test, instr);
+        assert_eq!(cpu_test.bus.load(rd + offset, 32), val);
+    }
     #[test]
     fn test_exec_addi() {
         let mut cpu_test = cpu::CPU::new();
