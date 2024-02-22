@@ -459,24 +459,112 @@ mod tests {
         // sub x31, x5, x6
         let instr: u32 = helper::set_r_type_instruction(6, 5, SUB as u8, 31);
         cpu::exec_sub(&mut cpu_test, instr);
-        assert_eq!(cpu_test.xregs.regs[31], 0xfffffffa); // 0xfffffffa is -6
+        assert_eq!(cpu_test.xregs.regs[31], -6 as i32 as u32);
     }
-    // #[test]
-    // fn test_exec_sll() {}
-    // #[test]
-    // fn test_exec_slt() {}
-    // #[test]
-    // fn test_exec_sltu() {}
-    // #[test]
-    // fn test_exec_xor() {}
-    // #[test]
-    // fn test_exec_srl() {}
-    // #[test]
-    // fn test_exec_sra() {}
-    // #[test]
-    // fn test_exec_or() {}
-    // #[test]
-    // fn test_exec_and() {}
+    #[test]
+    fn test_exec_sll() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // sll x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SLL as u8, 31);
+        cpu::exec_sll(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], -32 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_slt() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // slt x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SLT as u8, 31);
+        cpu::exec_slt(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 1 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_sltu() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // sltu x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SLTU as u8, 31);
+        cpu::exec_sltu(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 0 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_xor() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // xor x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, XOR as u8, 31);
+        cpu::exec_xor(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], -6 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_srl() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // srl x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SRL as u8, 31);
+        cpu::exec_srl(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 268435455);
+    }
+    #[test]
+    fn test_exec_sra() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -17);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // sra x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, SRA as u8, 31);
+        cpu::exec_sra(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], -2 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_or() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // or x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, OR as u8, 31);
+        cpu::exec_or(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], -2 as i32 as u32);
+    }
+    #[test]
+    fn test_exec_and() {
+        let mut cpu_test = cpu::CPU::new();
+
+        // set x5=-2
+        helper::set_register_val(&mut cpu_test, 5, -2);
+        // set x6=4
+        helper::set_register_val(&mut cpu_test, 6, 4);
+        // and x31, x5, x6
+        let instr: u32 = helper::set_r_type_instruction(6, 5, AND as u8, 31);
+        cpu::exec_and(&mut cpu_test, instr);
+        assert_eq!(cpu_test.xregs.regs[31], 4);
+    }
     // #[test]
     // fn test_exec_fence() {}
     // #[test]

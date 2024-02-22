@@ -276,14 +276,41 @@ pub fn exec_sub(cpu: &mut CPU, instr: u32) {
         - cpu.xregs.regs[rs2(instr) as usize] as i32)
         as u32;
 }
-pub fn exec_sll(cpu: &mut CPU, instr: u32) {}
-pub fn exec_slt(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sltu(cpu: &mut CPU, instr: u32) {}
-pub fn exec_xor(cpu: &mut CPU, instr: u32) {}
-pub fn exec_srl(cpu: &mut CPU, instr: u32) {}
-pub fn exec_sra(cpu: &mut CPU, instr: u32) {}
-pub fn exec_or(cpu: &mut CPU, instr: u32) {}
-pub fn exec_and(cpu: &mut CPU, instr: u32) {}
+pub fn exec_sll(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = ((cpu.xregs.regs[rs1(instr) as usize] as i32)
+        << cpu.xregs.regs[rs2(instr) as usize] as i32)
+        as u32;
+}
+pub fn exec_slt(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = ((cpu.xregs.regs[rs1(instr) as usize] as i32)
+        < cpu.xregs.regs[rs2(instr) as usize] as i32)
+        as u32;
+}
+pub fn exec_sltu(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] =
+        (cpu.xregs.regs[rs1(instr) as usize] < cpu.xregs.regs[rs2(instr) as usize]) as u32;
+}
+pub fn exec_xor(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] =
+        cpu.xregs.regs[rs1(instr) as usize] ^ cpu.xregs.regs[rs2(instr) as usize];
+}
+pub fn exec_srl(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] =
+        cpu.xregs.regs[rs1(instr) as usize] >> cpu.xregs.regs[rs2(instr) as usize];
+}
+pub fn exec_sra(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] = ((cpu.xregs.regs[rs1(instr) as usize] as i32)
+        >> cpu.xregs.regs[rs2(instr) as usize] as i32)
+        as u32;
+}
+pub fn exec_or(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] =
+        cpu.xregs.regs[rs1(instr) as usize] | cpu.xregs.regs[rs2(instr) as usize];
+}
+pub fn exec_and(cpu: &mut CPU, instr: u32) {
+    cpu.xregs.regs[rd(instr) as usize] =
+        cpu.xregs.regs[rs1(instr) as usize] & cpu.xregs.regs[rs2(instr) as usize];
+}
 pub fn exec_fence(cpu: &mut CPU, instr: u32) {}
 pub fn exec_fence_i(cpu: &mut CPU, instr: u32) {}
 pub fn exec_ecall(cpu: &mut CPU, instr: u32) {}
