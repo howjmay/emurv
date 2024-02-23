@@ -1,10 +1,8 @@
-// pub mod cpu;
-
 use crate::memory;
 use crate::opcode::*;
 use crate::registers;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct CPU {
     // integer registers
     pub xregs: registers::XREGS,

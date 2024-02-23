@@ -1,5 +1,3 @@
-// pub mod opcode;
-
 pub const LUI: u32 = 0x37;
 pub const AUIPC: u32 = 0x17;
 
