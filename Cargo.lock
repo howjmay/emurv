@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "emurv"
+name = "riscland"
 version = "0.1.0"
