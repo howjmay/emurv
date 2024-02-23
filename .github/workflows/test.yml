@@ -18,6 +18,6 @@ jobs:
 
       - name: run tests
         run: |
-          cargo test --package emurv --test cpu_test -- tests --nocapture
+          cargo test --package riscland --test cpu_test -- tests --nocapture
 
   

@@ -1,4 +1,4 @@
-use emurv::{
+use riscland::{
     cpu,
     opcode::{ADDI, B_TYPE, I_TYPE, LOAD, LUI, R_TYPE, S_TYPE},
 };

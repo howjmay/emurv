@@ -3,7 +3,7 @@ mod helper;
 #[cfg(test)]
 mod tests {
     use crate::helper;
-    use emurv::{cpu, memory::MEM_BASE, opcode::*};
+    use riscland::{cpu, memory::MEM_BASE, opcode::*};
 
     #[test]
     fn test_exec_lui() {
