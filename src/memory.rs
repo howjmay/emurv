@@ -1,9 +1,7 @@
-// pub mod memory;
-
 pub const MEM_BASE: u32 = 0x80000000; // defined in QEMU
-pub const MEM_SIZE: u32 = 1024;
+pub const MEM_SIZE: u32 = 1024 * 10;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct BUS {
     mem: MEMORY,
 }
@@ -12,23 +10,29 @@ impl BUS {
     pub fn new() -> Self {
         BUS { mem: MEMORY::new() }
     }
-    pub fn load(self, addr: u32, size: u32) -> u32 {
-        return self.mem.load(addr, size) as u32;
+    pub fn load(&self, addr: u32, size: u32) -> u32 {
+        return self.mem.clone().load(addr, size) as u32;
     }
     pub fn store(&mut self, addr: u32, size: u32, value: u32) {
         self.mem.store(addr, size, value);
     }
+    pub fn init_memory(&mut self, buf: Vec<u8>) {
+        if buf.len() > MEM_SIZE as usize {
+            panic!("binary file is bigger than MEM_SIZE");
+        }
+        self.mem.mem = buf.as_slice().try_into().expect("failed to read bin file");
+    }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct MEMORY {
-    mem: [u8; MEM_SIZE as usize],
+    mem: Vec<u8>,
 }
 
 impl MEMORY {
     fn new() -> Self {
         MEMORY {
-            mem: [0; MEM_SIZE as usize],
+            mem: Vec::<u8>::new(),
         }
     }
 

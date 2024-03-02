@@ -1,5 +1,3 @@
-// pub mod opcode;
-
 pub const LUI: u32 = 0x37;
 pub const AUIPC: u32 = 0x17;
 
@@ -110,7 +108,7 @@ pub fn csr(instr: u32) -> u32 {
 
 pub fn imm_b(instr: u32) -> u32 {
     // imm[12|10:5|4:1|11] = inst[31|30:25|11:8|7]
-    return ((instr & 0x80000000) >> 19) as u32
+    return ((instr & 0x80000000) as i32 >> 19) as u32
         | ((instr & 0x80) << 4) as u32 // imm[11]
         | ((instr >> 20) & 0x7e0) as u32 // imm[10:5]
         | ((instr >> 7) & 0x1e) as u32; // imm[4:1]
@@ -137,4 +135,97 @@ pub fn imm_j(instr: u32) -> u32 {
     | ((instr & 0x3ff00000) >> 20) as u32 // imm[10:1]
     | ((instr & 0x80000) >> 9) as u32 // imm[11]
     | (instr & 0xff000) as u32; // imm[19:12]
+}
+
+pub fn get_instr_name(instr: u32) -> String {
+    let opcode = instr & 0x7f;
+    let funct3 = (instr >> 12) & 0x7;
+    let funct7 = (instr >> 25) & 0x7f;
+
+    match opcode {
+        LUI => "lui".to_string(),
+        AUIPC => "auipc".to_string(),
+        JAL => "jal".to_string(),
+        JALR => "jalr".to_string(),
+        B_TYPE => match funct3 {
+            BEQ => "beq".to_string(),
+            BNE => "bne".to_string(),
+            BLT => "blt".to_string(),
+            BGE => "bge".to_string(),
+            BLTU => "bltu".to_string(),
+            BGEU => "bgeu".to_string(),
+            _ => panic!(),
+        },
+        LOAD => match funct3 {
+            LB => "lb".to_string(),
+            LH => "lh".to_string(),
+            LW => "lw".to_string(),
+            LBU => "lbu".to_string(),
+            LHU => "lhu".to_string(),
+            LWU => "lwu".to_string(),
+            _ => panic!(),
+        },
+        S_TYPE => match funct3 {
+            SB => "sb".to_string(),
+            SH => "sh".to_string(),
+            SW => "sw".to_string(),
+            _ => panic!(),
+        },
+        I_TYPE => match funct3 {
+            ADDI => "addi".to_string(),
+            SLLI => "slli".to_string(),
+            SLTI => "slti".to_string(),
+            SLTIU => "sltiu".to_string(),
+            XORI => "xori".to_string(),
+            SRI => match funct7 {
+                SRLI => "srli".to_string(),
+                SRAI => "srai".to_string(),
+                _ => panic!(),
+            },
+            ORI => "ori".to_string(),
+            ANDI => "andi".to_string(),
+            _ => {
+                panic!("malformed I type instruction");
+            }
+        },
+        R_TYPE => match funct3 {
+            ADDSUB => match funct7 {
+                ADD => "add".to_string(),
+                SUB => "sub".to_string(),
+                _ => panic!("errors in ADD/SUB"),
+            },
+            SLL => "sll".to_string(),
+            SLT => "slt".to_string(),
+            SLTU => "sltu".to_string(),
+            XOR => "xor".to_string(),
+            SR => match funct7 {
+                SRL => "srl".to_string(),
+                SRA => "sra".to_string(),
+                _ => panic!("errors in SR"),
+            },
+            OR => "or".to_string(),
+            AND => "and".to_string(),
+            _ => {
+                panic!("malformed I type instruction");
+            }
+        },
+        FENCE => "fence".to_string(),
+        CSR => match (funct3) {
+            ECALL | EBREAK => match imm_i(instr) {
+                0x0 => "ecall".to_string(),
+                0x1 => "ebreak".to_string(),
+                _ => "not ECALL/EBREAK".to_string(),
+            },
+            CSRRW => "csrrw".to_string(),
+            CSRRS => "csrrs".to_string(),
+            CSRRC => "csrrc".to_string(),
+            CSRRWI => "csrrwi".to_string(),
+            CSRRSI => "csrrsi".to_string(),
+            CSRRCI => "csrrci".to_string(),
+            _ => {
+                panic!("malformed CSR instruction");
+            }
+        },
+        _ => panic!("invalid instr {}, opcode: {:b}", instr, opcode),
+    }
 }

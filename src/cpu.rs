@@ -1,10 +1,9 @@
-// pub mod cpu;
-
+use crate::debug::REGS_NAMES;
 use crate::memory;
 use crate::opcode::*;
 use crate::registers;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct CPU {
     // integer registers
     pub xregs: registers::XREGS,
@@ -25,23 +24,23 @@ impl CPU {
         return cpu;
     }
 
-    fn fetch(self) -> u32 {
+    pub fn fetch(&self) -> u32 {
         let instr: u32 = self.bus.load(self.pc, 32);
         return instr;
     }
 
-    fn execute(&mut self, instr: u32) {
+    pub fn execute(&mut self, instr: u32) {
         let opcode = instr & 0x7f;
         let funct3 = (instr >> 12) & 0x7;
         let funct7 = (instr >> 25) & 0x7f;
         self.xregs.regs[0] = 0; // x0 hardwired to 0 at each cycle
 
-        match instr {
+        match opcode {
             LUI => exec_lui(self, instr),
             AUIPC => exec_auipc(self, instr),
             JAL => exec_jal(self, instr),
             JALR => exec_jalr(self, instr),
-            B_TYPE => match funct7 {
+            B_TYPE => match funct3 {
                 BEQ => exec_beq(self, instr),
                 BNE => exec_bne(self, instr),
                 BLT => exec_blt(self, instr),
@@ -104,7 +103,23 @@ impl CPU {
                 }
             },
             FENCE => exec_fence(self, instr),
-            _ => panic!(),
+            CSR => match (funct3) {
+                ECALL | EBREAK => match imm_i(instr) {
+                    0x0 => exec_ecall(self, instr),
+                    0x1 => exec_ebreak(self, instr),
+                    _ => (),
+                },
+                CSRRW => exec_csrrw(self, instr),
+                CSRRS => exec_csrrs(self, instr),
+                CSRRC => exec_csrrc(self, instr),
+                CSRRWI => exec_csrrwi(self, instr),
+                CSRRSI => exec_csrrsi(self, instr),
+                CSRRCI => exec_csrrci(self, instr),
+                _ => {
+                    panic!("malformed CSR instruction");
+                }
+            },
+            _ => panic!("invalid instr {}, opcode: {:b}", instr, opcode),
         }
     }
 }
@@ -113,16 +128,18 @@ impl CPU {
 // see page 64 at https://riscv.org/wp-content/uploads/2016/06/riscv-spec-v2.1.pdf
 pub fn exec_lui(cpu: &mut CPU, instr: u32) {
     let imm = (imm_u(instr) as i32) as u32;
-    cpu.xregs.regs[rd(instr) as usize] = imm | (cpu.xregs.regs[rd(instr) as usize] & 0xfff);
+    dump_format_instr_u(cpu, instr);
+    cpu.xregs.regs[rd(instr) as usize] = imm;
 }
 pub fn exec_auipc(cpu: &mut CPU, instr: u32) {
     let imm = imm_u(instr) as i32;
+    dump_format_instr_u(cpu, instr);
     cpu.xregs.regs[rd(instr) as usize] = (cpu.pc as i32).wrapping_add(imm) as u32;
 }
 pub fn exec_jal(cpu: &mut CPU, instr: u32) {
     let imm = imm_j(instr) as i32;
-    cpu.xregs.regs[rd(instr) as usize] = cpu.pc + 4;
-    cpu.pc = (cpu.pc as i32 + imm) as u32;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.pc.wrapping_add(4);
+    cpu.pc = ((cpu.pc as i32).wrapping_add(imm)).wrapping_sub(4) as u32;
 }
 pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
     let imm = imm_i(instr) as i32;
@@ -133,38 +150,40 @@ pub fn exec_jalr(cpu: &mut CPU, instr: u32) {
 pub fn exec_beq(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
     if cpu.xregs.regs[rs1(instr) as usize] == cpu.xregs.regs[rs2(instr) as usize] {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_bne(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
+    dump_format_instr_b(cpu, instr);
     if cpu.xregs.regs[rs1(instr) as usize] != cpu.xregs.regs[rs2(instr) as usize] {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_blt(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
+    dump_format_instr_b(cpu, instr);
     if (cpu.xregs.regs[rs1(instr) as usize] as i32) < (cpu.xregs.regs[rs2(instr) as usize] as i32) {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_bge(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
     if (cpu.xregs.regs[rs1(instr) as usize] as i32) >= (cpu.xregs.regs[rs2(instr) as usize] as i32)
     {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_bltu(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
     if cpu.xregs.regs[rs1(instr) as usize] < cpu.xregs.regs[rs2(instr) as usize] {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_bgeu(cpu: &mut CPU, instr: u32) {
     let imm = imm_b(instr) as i32;
-    if cpu.xregs.regs[rs1(instr) as usize] >= rs2(instr) {
-        cpu.pc = cpu.pc.wrapping_add(imm as u32).wrapping_sub(4);
+    if cpu.xregs.regs[rs1(instr) as usize] >= cpu.xregs.regs[rs2(instr) as usize] {
+        cpu.pc = (cpu.pc as i32).wrapping_add(imm).wrapping_sub(4) as u32;
     }
 }
 pub fn exec_lb(cpu: &mut CPU, instr: u32) {
@@ -228,7 +247,9 @@ pub fn exec_sw(cpu: &mut CPU, instr: u32) {
 }
 pub fn exec_addi(cpu: &mut CPU, instr: u32) {
     let imm = imm_i(instr);
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] + imm as u32;
+    dump_format_instr_i(cpu, instr);
+    cpu.xregs.regs[rd(instr) as usize] =
+        (cpu.xregs.regs[rs1(instr) as usize] as i32).wrapping_add(imm) as u32;
 }
 pub fn exec_slti(cpu: &mut CPU, instr: u32) {
     let imm = imm_i(instr);
@@ -252,9 +273,10 @@ pub fn exec_andi(cpu: &mut CPU, instr: u32) {
     cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] & imm as u32;
 }
 pub fn exec_slli(cpu: &mut CPU, instr: u32) {
-    let imm = imm_i(instr);
+    let shamt = shamt(instr);
+    dump_format_instr_i(cpu, instr);
     // shift-by-immediate takes only the lower 5 bits
-    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] << (imm & 0x1f) as u32;
+    cpu.xregs.regs[rd(instr) as usize] = cpu.xregs.regs[rs1(instr) as usize] << shamt;
 }
 pub fn exec_srli(cpu: &mut CPU, instr: u32) {
     let imm = imm_i(instr);
@@ -272,8 +294,9 @@ pub fn exec_add(cpu: &mut CPU, instr: u32) {
         as u32;
 }
 pub fn exec_sub(cpu: &mut CPU, instr: u32) {
-    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i32
-        - cpu.xregs.regs[rs2(instr) as usize] as i32)
+    dump_format_instr_r(cpu, instr);
+    cpu.xregs.regs[rd(instr) as usize] = (cpu.xregs.regs[rs1(instr) as usize] as i32)
+        .wrapping_sub(cpu.xregs.regs[rs2(instr) as usize] as i32)
         as u32;
 }
 pub fn exec_sll(cpu: &mut CPU, instr: u32) {
@@ -321,3 +344,68 @@ pub fn exec_csrrc(cpu: &mut CPU, instr: u32) {}
 pub fn exec_csrrwi(cpu: &mut CPU, instr: u32) {}
 pub fn exec_csrrsi(cpu: &mut CPU, instr: u32) {}
 pub fn exec_csrrci(cpu: &mut CPU, instr: u32) {}
+
+fn dump_format_instr_r(cpu: &CPU, instr: u32) {
+    println!(
+        "{}<- {}: {:#x}, {}: {:#x}",
+        REGS_NAMES[rd(instr) as usize],
+        REGS_NAMES[rs1(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        REGS_NAMES[rs2(instr) as usize],
+        cpu.xregs.regs[rs2(instr) as usize],
+    );
+}
+fn dump_format_instr_i(cpu: &CPU, instr: u32) {
+    println!(
+        "{}<- {}: {:#x}, imm: {:#x}",
+        REGS_NAMES[rd(instr) as usize],
+        REGS_NAMES[rs1(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        imm_i(instr) as i32,
+    );
+}
+fn dump_format_instr_s(cpu: &CPU, instr: u32) {
+    println!(
+        "{}: {:#x}, {}: {:#x}, imm: {:#x}",
+        REGS_NAMES[rs1(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        REGS_NAMES[rs2(instr) as usize],
+        cpu.xregs.regs[rs2(instr) as usize],
+        imm_s(instr) as i32,
+    );
+}
+fn dump_format_instr_load(cpu: &CPU, instr: u32) {
+    println!(
+        "{}<- {}: {:#x}, imm: {:#x}",
+        REGS_NAMES[rd(instr) as usize],
+        REGS_NAMES[rs1(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        imm_i(instr) as i32,
+    );
+}
+fn dump_format_instr_b(cpu: &CPU, instr: u32) {
+    println!(
+        "{}: {:#x}, {}: {:#x}, imm: {:#x}",
+        REGS_NAMES[rs1(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        REGS_NAMES[rs2(instr) as usize],
+        cpu.xregs.regs[rs2(instr) as usize],
+        imm_b(instr),
+    );
+}
+fn dump_format_instr_j(cpu: &CPU, instr: u32) {
+    println!(
+        "{}<- {:#x}, imm: {:#x}",
+        REGS_NAMES[rd(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        imm_j(instr) as u32,
+    );
+}
+fn dump_format_instr_u(cpu: &CPU, instr: u32) {
+    println!(
+        "{}<- {:#x}, imm: {:#x}",
+        REGS_NAMES[rd(instr) as usize],
+        cpu.xregs.regs[rs1(instr) as usize],
+        imm_u(instr) as u32,
+    );
+}

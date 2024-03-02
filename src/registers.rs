@@ -1,5 +1,3 @@
-// pub mod registers;
-
 use core::fmt;
 
 #[derive(Clone, Copy)]
